@@ -49,8 +49,31 @@
                             </div>
                         </div>
                     </div>
-                    
                     <button class="create-deck-btn" id="createDeckBtn" disabled>Create Deck</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Deck Playing View -->
+        <div class="deck-playing-view" id="deckPlayingView">
+            <div class="playing-container">
+                <button class="exit-btn" id="exitDeckBtn">&times;</button>
+                
+                <!-- Flipped card area (left side) -->
+                <div id="flippedCardArea"></div>
+                
+                <!-- Remaining deck (right side) -->
+                <div id="remainingDeckArea">
+                    <div class="card-display" id="deckDisplay">
+                        <div class="card-back" id="cardBack"></div>
+                    </div>
+                </div>
+                
+                <!-- Deck info below -->
+                <div class="deck-info" id="deckInfo">
+                    <div class="deck-title" id="playingDeckTitle"></div>
+                    <div class="cards-remaining" id="cardsRemaining"></div>
+                    <div class="reset-hint" id="resetHint" style="display: none;">Click to shuffle and restart</div>
                 </div>
             </div>
         </div>

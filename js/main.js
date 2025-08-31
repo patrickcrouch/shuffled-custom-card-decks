@@ -65,10 +65,19 @@ class CardDeckApp {
             this.createCustomDeck();
         });
 
-        // ESC key to close modal
+        // Exit deck playing view
+        document.getElementById('exitDeckBtn').addEventListener('click', () => {
+            this.exitDeckView();
+        });
+
+        // ESC key to close modal or exit deck view
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-                this.closeDeckCreation();
+                if (document.getElementById('deckPlayingView').classList.contains('active')) {
+                    this.exitDeckView();
+                } else {
+                    this.closeDeckCreation();
+                }
             }
         });
     }
@@ -173,8 +182,135 @@ class CardDeckApp {
     }
 
     selectDeck(deck) {
-        // Placeholder for deck selection (next step)
-        console.log(`Selected deck: ${deck.name} with ${deck.cards.length} cards`);
+        this.currentDeck = deck;
+        this.showDeckPlayingView();
+    }
+
+    showDeckPlayingView() {
+        // Update deck info
+        document.getElementById('playingDeckTitle').textContent = this.currentDeck.name;
+        this.updateDeckPlayingUI();
+        
+        // Show the playing view
+        document.getElementById('deckPlayingView').classList.add('active');
+        
+        // Setup card click handler
+        this.setupCardClickHandler();
+    }
+
+    setupCardClickHandler() {
+        const cardBack = document.getElementById('cardBack');
+        const remainingDeckArea = document.getElementById('remainingDeckArea');
+        
+        // Remove existing listeners
+        cardBack.replaceWith(cardBack.cloneNode(true));
+        const newCardBack = document.getElementById('cardBack');
+        
+        if (this.currentDeck.currentIndex < this.currentDeck.cards.length) {
+            // Still have cards to flip
+            newCardBack.addEventListener('click', () => {
+                this.flipNextCard();
+            });
+        } else {
+            // Deck is empty, show reset option
+            remainingDeckArea.innerHTML = `
+                <div class="empty-deck" id="emptyDeck">
+                    <div class="empty-deck-text">Click to<br>shuffle & restart</div>
+                </div>
+            `;
+            
+            document.getElementById('emptyDeck').addEventListener('click', () => {
+                this.resetDeck();
+            });
+        }
+    }
+
+    updateDeckPlayingUI() {
+        const totalCards = this.currentDeck.cards.length;
+        const remaining = totalCards - this.currentDeck.currentIndex;
+        
+        document.getElementById('cardsRemaining').textContent = `${remaining} of ${totalCards} cards remaining`;
+        
+        const resetHint = document.getElementById('resetHint');
+        if (remaining === 0) {
+            resetHint.style.display = 'block';
+        } else {
+            resetHint.style.display = 'none';
+        }
+    }
+
+    flipNextCard() {
+        if (this.currentDeck.currentIndex >= this.currentDeck.cards.length) return;
+        
+        const card = this.currentDeck.cards[this.currentDeck.currentIndex];
+        this.currentDeck.currentIndex++;
+        
+        // Update the deck in storage
+        this.saveDecks();
+        
+        // Create flipped card element
+        this.showFlippedCard(card);
+        
+        // Update UI
+        this.updateDeckPlayingUI();
+        this.setupCardClickHandler();
+    }
+
+    showFlippedCard(card) {
+        const flippedCardArea = document.getElementById('flippedCardArea');
+        
+        const cardElement = document.createElement('div');
+        cardElement.className = `flipped-card ${card.color}`;
+        
+        cardElement.innerHTML = `
+            <div class="corner-rank top-left">${card.rank}<br>${card.suit}</div>
+            <div class="rank">${card.rank}</div>
+            <div class="suit">${card.suit}</div>
+            <div class="corner-rank bottom-right">${card.rank}<br>${card.suit}</div>
+        `;
+        
+        // Clear previous card and show new one
+        flippedCardArea.innerHTML = '';
+        flippedCardArea.appendChild(cardElement);
+        
+        // Add a subtle animation
+        cardElement.style.opacity = '0';
+        cardElement.style.transform = 'scale(0.8)';
+        setTimeout(() => {
+            cardElement.style.transition = 'all 0.3s ease';
+            cardElement.style.opacity = '1';
+            cardElement.style.transform = 'scale(1)';
+        }, 10);
+    }
+
+    resetDeck() {
+        // Shuffle the deck again
+        this.currentDeck.cards = this.shuffleArray(this.currentDeck.cards);
+        this.currentDeck.currentIndex = 0;
+        this.saveDecks();
+        
+        // Clear flipped card
+        document.getElementById('flippedCardArea').innerHTML = '';
+        
+        // Reset the deck display
+        const remainingDeckArea = document.getElementById('remainingDeckArea');
+        remainingDeckArea.innerHTML = `
+            <div class="card-display" id="deckDisplay">
+                <div class="card-back" id="cardBack"></div>
+            </div>
+        `;
+        
+        // Update UI and setup handlers
+        this.updateDeckPlayingUI();
+        this.setupCardClickHandler();
+    }
+
+    exitDeckView() {
+        document.getElementById('deckPlayingView').classList.remove('active');
+        this.currentDeck = null;
+        
+        // Refresh main view to show updated deck states
+        this.render();
     }
 
     showDeckCreation() {
