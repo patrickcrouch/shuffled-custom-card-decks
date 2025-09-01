@@ -132,6 +132,15 @@ class CardDeckApp {
         deckCard.innerHTML = `
             <div class="deck-card-header">
                 <h3 class="deck-name">${deck.name}</h3>
+                <div class="deck-options">
+                    <button class="deck-options-btn" data-deck-id="${deck.id}">⋮</button>
+                    <div class="deck-options-menu" id="options-${deck.id}">
+                        <div class="deck-option-item" data-action="rename" data-deck-id="${deck.id}">Rename Deck</div>
+                        <div class="deck-option-item" data-action="duplicate" data-deck-id="${deck.id}">Duplicate Deck</div>
+                        <div class="deck-option-item" data-action="reset" data-deck-id="${deck.id}">Clear Progress</div>
+                        <div class="deck-option-item danger" data-action="delete" data-deck-id="${deck.id}">Delete Deck</div>
+                    </div>
+                </div>
                 <div class="deck-stats">
                     <span class="card-count">${remainingCards}/${totalCards}</span>
                 </div>
@@ -153,12 +162,70 @@ class CardDeckApp {
             </div>
         `;
         
-        // Add click handler
-        deckCard.addEventListener('click', () => {
-            this.selectDeck(deck);
+        // Add click handler for deck selection (but not on options)
+        deckCard.addEventListener('click', (e) => {
+            // Don't trigger deck selection if clicking on options
+            if (!e.target.closest('.deck-options')) {
+                this.selectDeck(deck);
+            }
         });
         
+        // Add options menu handlers
+        this.setupDeckOptionsHandlers(deckCard, deck);
+        
         return deckCard;
+    }
+
+    setupDeckOptionsHandlers(deckCard, deck) {
+        const optionsBtn = deckCard.querySelector('.deck-options-btn');
+        const optionsMenu = deckCard.querySelector('.deck-options-menu');
+        const optionItems = deckCard.querySelectorAll('.deck-option-item');
+        
+        // Toggle menu
+        optionsBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.closeAllOptionsMenus();
+            optionsMenu.classList.add('active');
+        });
+        
+        // Handle option clicks
+        optionItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const action = item.dataset.action;
+                optionsMenu.classList.remove('active');
+                
+                this.handleDeckAction(action, deck);
+            });
+        });
+        
+        // Close menu when clicking outside
+        document.addEventListener('click', () => {
+            optionsMenu.classList.remove('active');
+        });
+    }
+
+    closeAllOptionsMenus() {
+        document.querySelectorAll('.deck-options-menu').forEach(menu => {
+            menu.classList.remove('active');
+        });
+    }
+
+    handleDeckAction(action, deck) {
+        switch (action) {
+            case 'rename':
+                this.renameDeck(deck);
+                break;
+            case 'duplicate':
+                this.duplicateDeck(deck);
+                break;
+            case 'reset':
+                this.resetDeckProgress(deck);
+                break;
+            case 'delete':
+                this.confirmDeleteDeck(deck);
+                break;
+        }
     }
 
     getSuitCounts(cards) {
@@ -284,10 +351,7 @@ class CardDeckApp {
     }
 
     resetDeck() {
-        // Shuffle the deck again
-        this.currentDeck.cards = this.shuffleArray(this.currentDeck.cards);
         this.currentDeck.currentIndex = 0;
-        this.saveDecks();
         
         // Clear flipped card
         document.getElementById('flippedCardArea').innerHTML = '';
@@ -311,6 +375,103 @@ class CardDeckApp {
         
         // Refresh main view to show updated deck states
         this.render();
+    }
+
+    // Deck Management Functions
+    renameDeck(deck) {
+        const newName = prompt('Enter new deck name:', deck.name);
+        if (newName && newName.trim() && newName.trim() !== deck.name) {
+            deck.name = newName.trim();
+            this.saveDecks();
+            this.render();
+        }
+    }
+
+    duplicateDeck(deck) {
+        const newDeck = {
+            id: Date.now().toString(),
+            name: `${deck.name} (Copy)`,
+            cards: [...deck.cards], // Copy the cards array
+            currentIndex: 0, // Reset progress for duplicate
+            createdAt: new Date().toISOString()
+        };
+        
+        // Shuffle the duplicated deck
+        newDeck.cards = this.shuffleArray(newDeck.cards);
+        
+        this.decks.push(newDeck);
+        this.saveDecks();
+        this.render();
+    }
+
+    resetDeckProgress(deck) {
+        deck.currentIndex = 0;
+        // Re-shuffle the deck
+        deck.cards = this.shuffleArray(deck.cards);
+        this.saveDecks();
+        this.render();
+    }
+
+    confirmDeleteDeck(deck) {
+        this.showConfirmationModal(
+            '🗑️',
+            'Delete Deck',
+            `Are you sure you want to delete "${deck.name}"? This action cannot be undone.`,
+            'Delete',
+            () => this.deleteDeck(deck)
+        );
+    }
+
+    deleteDeck(deck) {
+        this.decks = this.decks.filter(d => d.id !== deck.id);
+        this.saveDecks();
+        this.render();
+    }
+
+    showConfirmationModal(icon, title, message, confirmText, onConfirm) {
+        const modal = document.getElementById('confirmationModal');
+        const iconEl = document.getElementById('confirmationIcon');
+        const titleEl = document.getElementById('confirmationTitle');
+        const messageEl = document.getElementById('confirmationMessage');
+        const confirmBtn = document.getElementById('confirmationConfirm');
+        const cancelBtn = document.getElementById('confirmationCancel');
+        
+        iconEl.textContent = icon;
+        titleEl.textContent = title;
+        messageEl.textContent = message;
+        confirmBtn.textContent = confirmText;
+        
+        // Remove existing listeners
+        const newConfirmBtn = confirmBtn.cloneNode(true);
+        const newCancelBtn = cancelBtn.cloneNode(true);
+        confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+        cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+        
+        // Add new listeners
+        newConfirmBtn.addEventListener('click', () => {
+            this.hideConfirmationModal();
+            onConfirm();
+        });
+        
+        newCancelBtn.addEventListener('click', () => {
+            this.hideConfirmationModal();
+        });
+        
+        // Show modal
+        modal.classList.add('active');
+        
+        // Close on ESC
+        const handleKeydown = (e) => {
+            if (e.key === 'Escape') {
+                this.hideConfirmationModal();
+                document.removeEventListener('keydown', handleKeydown);
+            }
+        };
+        document.addEventListener('keydown', handleKeydown);
+    }
+
+    hideConfirmationModal() {
+        document.getElementById('confirmationModal').classList.remove('active');
     }
 
     showDeckCreation() {

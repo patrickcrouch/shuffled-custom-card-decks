@@ -137,6 +137,78 @@ body {
     line-height: 1.3;
 }
 
+.deck-options {
+    position: relative;
+}
+
+.deck-options-btn {
+    background: none;
+    border: none;
+    color: #64748b;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.deck-options-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #e4e4e7;
+}
+
+.deck-options-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: #2a2a3e;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    min-width: 160px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+}
+
+.deck-options-menu.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.deck-option-item {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 0.9rem;
+    color: #e4e4e7;
+}
+
+.deck-option-item:last-child {
+    border-bottom: none;
+}
+
+.deck-option-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.deck-option-item.danger {
+    color: #f87171;
+}
+
+.deck-option-item.danger:hover {
+    background: rgba(248, 113, 113, 0.1);
+}
+
 .deck-stats {
     text-align: right;
 }
@@ -399,6 +471,94 @@ body {
     font-size: 0.9rem;
     text-align: center;
     font-weight: 500;
+}
+
+/* Confirmation Modal */
+.confirmation-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.confirmation-modal.active {
+    display: flex;
+    opacity: 1;
+}
+
+.confirmation-content {
+    background: linear-gradient(135deg, #2a2a3e 0%, #1e1e2f 100%);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 2rem;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+}
+
+.confirmation-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #f87171;
+}
+
+.confirmation-title {
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: #f1f5f9;
+    margin-bottom: 0.5rem;
+}
+
+.confirmation-message {
+    color: #94a3b8;
+    margin-bottom: 2rem;
+    line-height: 1.5;
+}
+
+.confirmation-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.btn-cancel, .btn-confirm {
+    flex: 1;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-cancel {
+    background: rgba(255, 255, 255, 0.1);
+    color: #e4e4e7;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-cancel:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.btn-confirm {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    color: white;
+}
+
+.btn-confirm:hover {
+    background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+    transform: translateY(-1px);
 }
 
 /* Deck Creation Modal */
