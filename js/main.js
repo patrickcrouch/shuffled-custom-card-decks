@@ -8,22 +8,50 @@ class CardDeckApp {
     }
 
     generateStandardDeck() {
-        const suits = ['♠', '♥', '♦', '♣'];
-        const ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+        const suits = ['spades', 'hearts', 'diamonds', 'clubs'];
+        const ranks = [
+            { name: 'ace', display: 'A' },
+            { name: '2', display: '2' },
+            { name: '3', display: '3' },
+            { name: '4', display: '4' },
+            { name: '5', display: '5' },
+            { name: '6', display: '6' },
+            { name: '7', display: '7' },
+            { name: '8', display: '8' },
+            { name: '9', display: '9' },
+            { name: '10', display: '10' },
+            { name: 'jack', display: 'J' },
+            { name: 'queen', display: 'Q' },
+            { name: 'king', display: 'K' }
+        ];
         const deck = [];
         
         suits.forEach(suit => {
             ranks.forEach(rank => {
+                const suitSymbol = this.getSuitSymbol(suit);
                 deck.push({
-                    suit: suit,
-                    rank: rank,
-                    id: `${rank}${suit}`,
-                    color: (suit === '♥' || suit === '♦') ? 'red' : 'black'
+                    suit: suitSymbol,
+                    suitName: suit,
+                    rank: rank.display,
+                    rankName: rank.name,
+                    id: `${rank.display}${suitSymbol}`,
+                    fileName: `${rank.name}_of_${suit}.svg`,
+                    color: (suit === 'hearts' || suit === 'diamonds') ? 'red' : 'black'
                 });
             });
         });
         
         return deck;
+    }
+
+    getSuitSymbol(suitName) {
+        const symbols = {
+            'spades': '♠',
+            'hearts': '♥',
+            'diamonds': '♦',
+            'clubs': '♣'
+        };
+        return symbols[suitName];
     }
 
     init() {
@@ -282,7 +310,7 @@ class CardDeckApp {
             // Deck is empty, show reset option
             remainingDeckArea.innerHTML = `
                 <div class="empty-deck" id="emptyDeck">
-                    <div class="empty-deck-text">Click to<br>shuffle & restart</div>
+                    <div class="empty-deck-text">Click to Restart</div>
                 </div>
             `;
             
@@ -327,14 +355,8 @@ class CardDeckApp {
         const flippedCardArea = document.getElementById('flippedCardArea');
         
         const cardElement = document.createElement('div');
-        cardElement.className = `flipped-card ${card.color}`;
-        
-        cardElement.innerHTML = `
-            <div class="corner-rank top-left">${card.rank}<br>${card.suit}</div>
-            <div class="rank">${card.rank}</div>
-            <div class="suit">${card.suit}</div>
-            <div class="corner-rank bottom-right">${card.rank}<br>${card.suit}</div>
-        `;
+        cardElement.className = 'flipped-card';
+        cardElement.style.backgroundImage = `url('svg/${card.fileName}')`;
         
         // Clear previous card and show new one
         flippedCardArea.innerHTML = '';
@@ -342,11 +364,11 @@ class CardDeckApp {
         
         // Add a subtle animation
         cardElement.style.opacity = '0';
-        cardElement.style.transform = 'scale(0.8)';
+        cardElement.style.transform = 'scale(0.8) rotateY(180deg)';
         setTimeout(() => {
-            cardElement.style.transition = 'all 0.3s ease';
+            cardElement.style.transition = 'all 0.4s ease';
             cardElement.style.opacity = '1';
-            cardElement.style.transform = 'scale(1)';
+            cardElement.style.transform = 'scale(1) rotateY(0deg)';
         }, 10);
     }
 
@@ -497,10 +519,10 @@ class CardDeckApp {
         cardGrid.innerHTML = '';
         
         const suits = [
-            { symbol: '♠', name: 'Spades' },
-            { symbol: '♥', name: 'Hearts' },
-            { symbol: '♦', name: 'Diamonds' },
-            { symbol: '♣', name: 'Clubs' }
+            { name: 'spades', symbol: '♠', displayName: 'Spades' },
+            { name: 'hearts', symbol: '♥', displayName: 'Hearts' },
+            { name: 'diamonds', symbol: '♦', displayName: 'Diamonds' },
+            { name: 'clubs', symbol: '♣', displayName: 'Clubs' }
         ];
 
         suits.forEach(suit => {
@@ -511,17 +533,30 @@ class CardDeckApp {
             cardGrid.appendChild(suitLabel);
 
             // Add cards for this suit
-            const ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+            const ranks = [
+                { name: 'ace', display: 'A' },
+                { name: '2', display: '2' },
+                { name: '3', display: '3' },
+                { name: '4', display: '4' },
+                { name: '5', display: '5' },
+                { name: '6', display: '6' },
+                { name: '7', display: '7' },
+                { name: '8', display: '8' },
+                { name: '9', display: '9' },
+                { name: '10', display: '10' },
+                { name: 'jack', display: 'J' },
+                { name: 'queen', display: 'Q' },
+                { name: 'king', display: 'K' }
+            ];
+            
             ranks.forEach(rank => {
                 const cardElement = document.createElement('div');
                 cardElement.className = 'card-selector';
-                cardElement.textContent = rank;
-                cardElement.dataset.cardId = `${rank}${suit.symbol}`;
+                const cardId = `${rank.display}${suit.symbol}`;
+                const fileName = `${rank.name}_of_${suit.name}.svg`;
                 
-                // Color the card text appropriately
-                if (suit.symbol === '♥' || suit.symbol === '♦') {
-                    cardElement.style.color = '#f87171';
-                }
+                cardElement.dataset.cardId = cardId;
+                cardElement.style.backgroundImage = `url('svg/${fileName}')`;
                 
                 cardElement.addEventListener('click', () => {
                     this.toggleCardSelection(cardElement);
