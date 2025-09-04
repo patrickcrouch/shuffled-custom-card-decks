@@ -98,6 +98,11 @@ class CardDeckApp {
             this.exitDeckView();
         });
 
+        // Reset deck button
+        document.getElementById('resetDeckBtn').addEventListener('click', () => {
+            this.resetDeckInView();
+        });
+
         // ESC key to close modal or exit deck view
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
@@ -122,7 +127,6 @@ class CardDeckApp {
     }
 
     render() {
-        const container = document.getElementById('decksContainer');
         const emptyState = document.getElementById('emptyState');
         
         if (this.decks.length === 0) {
@@ -178,11 +182,6 @@ class CardDeckApp {
                     ${Object.entries(suitCounts).map(([suit, count]) => 
                         `<span class="suit-count" style="color: ${(suit === '♥' || suit === '♦') ? '#f87171' : '#e4e4e7'}">${suit} ${count}</span>`
                     ).join('')}
-                </div>
-                <div class="deck-progress">
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: ${((totalCards - remainingCards) / totalCards) * 100}%"></div>
-                    </div>
                 </div>
             </div>
             <div class="deck-meta">
@@ -277,7 +276,16 @@ class CardDeckApp {
     }
 
     selectDeck(deck) {
-        this.currentDeck = deck;
+        // Create a session copy of the deck for playing
+        this.currentDeck = {
+            ...deck,
+            cards: [...deck.cards], // create a copy
+            currentIndex: 0 // Always start fresh
+        };
+
+        // Clear any flipped card
+        document.getElementById('flippedCardArea').innerHTML = '';
+        
         this.showDeckPlayingView();
     }
 
@@ -340,9 +348,6 @@ class CardDeckApp {
         const card = this.currentDeck.cards[this.currentDeck.currentIndex];
         this.currentDeck.currentIndex++;
         
-        // Update the deck in storage
-        this.saveDecks();
-        
         // Create flipped card element
         this.showFlippedCard(card);
         
@@ -391,11 +396,16 @@ class CardDeckApp {
         this.setupCardClickHandler();
     }
 
+    resetDeckInView() {
+        // Same as resetDeck but called from the reset button
+        this.resetDeck();
+    }
+
     exitDeckView() {
         document.getElementById('deckPlayingView').classList.remove('active');
         this.currentDeck = null;
         
-        // Refresh main view to show updated deck states
+        // Refresh main view to show decks
         this.render();
     }
 
@@ -422,14 +432,6 @@ class CardDeckApp {
         newDeck.cards = this.shuffleArray(newDeck.cards);
         
         this.decks.push(newDeck);
-        this.saveDecks();
-        this.render();
-    }
-
-    resetDeckProgress(deck) {
-        deck.currentIndex = 0;
-        // Re-shuffle the deck
-        deck.cards = this.shuffleArray(deck.cards);
         this.saveDecks();
         this.render();
     }
