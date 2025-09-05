@@ -9,7 +9,10 @@
 <body>
     <div class="app-container">
         <header class="header">
-            <h1 class="app-title">My Card Decks</h1>
+            <div class="title-section">
+                <h1 class="main-title">Memory Deck</h1>
+                <p class="subtitle">Create decks to use in training your memory using the method of loci</p>
+            </div>
             <button class="add-deck-btn" id="addDeckBtn" title="Create New Deck">+</button>
         </header>
         
@@ -32,6 +35,37 @@
                     <button class="close-btn" id="closeModal">&times;</button>
                 </div>
                 <div class="modal-body">
+                    <!-- Random Filter Section -->
+                    <div class="filter-section">
+                        <div class="filter-header" data-filter="random">
+                            <span class="filter-title">Random Filter</span>
+                            <span class="chevron">▼</span>
+                        </div>
+                        <div class="filter-content" id="randomFilterContent">
+                            <div class="filter-description">
+                                Generate a random deck with a specific number of cards (1-52). Perfect for quick practice sessions.
+                            </div>
+                            
+                            <input type="text" class="custom-filter-name" id="randomFilterName" placeholder="Enter deck name (e.g., 'Random 20 Cards')">
+                            
+                            <div class="deck-size-controls">
+                                <div class="size-input-group">
+                                    <label class="size-input-label">Cards</label>
+                                    <input type="number" class="size-number-input" id="sizeNumberInput" min="1" max="52" value="26">
+                                </div>
+                                <div class="size-slider-group">
+                                    <label class="size-input-label">Deck Size</label>
+                                    <input type="range" class="size-slider" id="sizeSlider" min="1" max="52" value="26">
+                                    <div class="slider-labels">
+                                        <span>1</span>
+                                        <span>26</span>
+                                        <span>52</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Custom Filter Section -->
                     <div class="filter-section">
                         <div class="filter-header" data-filter="custom">
                             <span class="filter-title">Custom Filter</span>

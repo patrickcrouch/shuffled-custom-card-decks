@@ -4,6 +4,7 @@ class CardDeckApp {
         this.decks = [];
         this.selectedCards = new Set();
         this.standardDeck = this.generateStandardDeck();
+        this.currentFilterType = null;
         this.init();
     }
 
@@ -78,9 +79,34 @@ class CardDeckApp {
             }
         });
 
+        // Filter header toggles
+        document.querySelector('[data-filter="random"]').addEventListener('click', () => {
+            this.toggleFilterSection('random');
+        });
+
         // Filter header toggle
         document.querySelector('[data-filter="custom"]').addEventListener('click', () => {
             this.toggleFilterSection('custom');
+        });
+
+        // Random filter controls
+        document.getElementById('randomFilterName').addEventListener('input', () => {
+            this.updateCreateButton();
+        });
+
+        const sizeNumberInput = document.getElementById('sizeNumberInput');
+        const sizeSlider = document.getElementById('sizeSlider');
+
+        sizeNumberInput.addEventListener('input', (e) => {
+            const value = Math.max(1, Math.min(52, parseInt(e.target.value) || 1));
+            e.target.value = value;
+            sizeSlider.value = value;
+            this.updateCreateButton();
+        });
+
+        sizeSlider.addEventListener('input', (e) => {
+            sizeNumberInput.value = e.target.value;
+            this.updateCreateButton();
         });
 
         // Custom filter name input
@@ -90,7 +116,7 @@ class CardDeckApp {
 
         // Create deck button
         document.getElementById('createDeckBtn').addEventListener('click', () => {
-            this.createCustomDeck();
+            this.createDeck();
         });
 
         // Exit deck playing view
@@ -500,20 +526,36 @@ class CardDeckApp {
 
     showDeckCreation() {
         this.selectedCards.clear();
+        this.currentFilterType = null;
         document.getElementById('customFilterName').value = '';
+        document.getElementById('randomFilterName').value = '';
+        document.getElementById('sizeNumberInput').value = '26';
+        document.getElementById('sizeSlider').value = '26';
         this.generateCardGrid();
         this.updateCreateButton();
         
         const modal = document.getElementById('modalOverlay');
         modal.classList.add('active');
         
-        // Auto-expand the custom filter section
-        this.toggleFilterSection('custom', true);
+        // Collapse all sections initially
+        this.collapseAllFilterSections();
     }
 
     closeDeckCreation() {
         const modal = document.getElementById('modalOverlay');
         modal.classList.remove('active');
+    }
+
+    collapseAllFilterSections() {
+        ['random', 'custom'].forEach(filterName => {
+            const header = document.querySelector(`[data-filter="${filterName}"]`);
+            const content = document.getElementById(`${filterName}FilterContent`);
+            const chevron = header.querySelector('.chevron');
+            
+            content.classList.remove('expanded');
+            header.classList.remove('active');
+            chevron.classList.remove('rotated');
+        });
     }
 
     generateCardGrid() {
@@ -583,32 +625,54 @@ class CardDeckApp {
         this.updateCreateButton();
     }
 
-    toggleFilterSection(filterName, forceOpen = false) {
+    toggleFilterSection(filterName) {
         const header = document.querySelector(`[data-filter="${filterName}"]`);
         const content = document.getElementById(`${filterName}FilterContent`);
         const chevron = header.querySelector('.chevron');
         
-        const isExpanded = content.classList.contains('expanded') && !forceOpen;
+        const isExpanded = content.classList.contains('expanded');
         
-        if (isExpanded) {
-            content.classList.remove('expanded');
-            header.classList.remove('active');
-            chevron.classList.remove('rotated');
-        } else {
+        // Collapse all sections first
+        this.collapseAllFilterSections();
+        
+        if (!isExpanded) {
+            // Expand the clicked section
             content.classList.add('expanded');
             header.classList.add('active');
             chevron.classList.add('rotated');
+            this.currentFilterType = filterName;
+        } else {
+            this.currentFilterType = null;
         }
+        
+        this.updateCreateButton();
     }
 
     updateCreateButton() {
-        const filterName = document.getElementById('customFilterName').value.trim();
-        const hasCards = this.selectedCards.size > 0;
         const createBtn = document.getElementById('createDeckBtn');
         
-        if (filterName && hasCards) {
-            createBtn.disabled = false;
-            createBtn.textContent = `Create Deck (${this.selectedCards.size} cards)`;
+        if (this.currentFilterType === 'random') {
+            const filterName = document.getElementById('randomFilterName').value.trim();
+            const deckSize = parseInt(document.getElementById('sizeNumberInput').value);
+            
+            if (filterName && deckSize >= 1 && deckSize <= 52) {
+                createBtn.disabled = false;
+                createBtn.textContent = `Create Random Deck (${deckSize} cards)`;
+            } else {
+                createBtn.disabled = true;
+                createBtn.textContent = 'Create Deck';
+            }
+        } else if (this.currentFilterType === 'custom') {
+            const filterName = document.getElementById('customFilterName').value.trim();
+            const hasCards = this.selectedCards.size > 0;
+            
+            if (filterName && hasCards) {
+                createBtn.disabled = false;
+                createBtn.textContent = `Create Custom Deck (${this.selectedCards.size} cards)`;
+            } else {
+                createBtn.disabled = true;
+                createBtn.textContent = 'Create Deck';
+            }
         } else {
             createBtn.disabled = true;
             createBtn.textContent = 'Create Deck';
@@ -622,6 +686,42 @@ class CardDeckApp {
             [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
         }
         return shuffled;
+    }
+
+    createDeck() {
+        if (this.currentFilterType === 'random') {
+            this.createRandomDeck();
+        } else if (this.currentFilterType === 'custom') {
+            this.createCustomDeck();
+        }
+    }
+
+    createRandomDeck() {
+        const filterName = document.getElementById('randomFilterName').value.trim();
+        const deckSize = parseInt(document.getElementById('sizeNumberInput').value);
+        
+        // Get random selection of cards
+        const shuffledStandardDeck = this.shuffleArray(this.standardDeck);
+        const randomCards = shuffledStandardDeck.slice(0, deckSize);
+        
+        // Shuffle again for practice order
+        const shuffledCards = this.shuffleArray(randomCards);
+        
+        const newDeck = {
+            id: Date.now().toString(),
+            name: filterName,
+            cards: shuffledCards,
+            currentIndex: 0,
+            createdAt: new Date().toISOString()
+        };
+        
+        this.decks.push(newDeck);
+        this.saveDecks();
+        
+        this.closeDeckCreation();
+        this.render();
+        
+        console.log(`Created random deck "${filterName}" with ${shuffledCards.length} cards`);
     }
 
     createCustomDeck() {

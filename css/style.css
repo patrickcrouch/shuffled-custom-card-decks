@@ -25,11 +25,29 @@ body {
     margin-bottom: 3rem;
 }
 
-.app-title {
-    font-size: 1.8rem;
-    font-weight: 300;
+.title-section {
+    text-align: left;
+}
+
+.main-title {
+    font-size: 2.5rem;
+    font-weight: 600;
     color: #f1f5f9;
     letter-spacing: 0.5px;
+    margin: 0 0 0.5rem 0;
+    background: linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.subtitle {
+    font-size: 1rem;
+    color: #94a3b8;
+    margin: 0;
+    font-weight: 300;
+    line-height: 1.4;
+    max-width: 400px;
 }
 
 .add-deck-btn {
@@ -105,7 +123,6 @@ body {
     line-height: 1.6;
 }
 
-/* Deck cards will be styled here in future steps */
 .deck-card {
     background: rgba(255, 255, 255, 0.08);
     border-radius: 16px;
@@ -730,6 +747,93 @@ body {
     background: rgba(255, 255, 255, 0.08);
 }
 
+/* New styles for random filter */
+.deck-size-controls {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.size-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.size-input-label {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    font-weight: 500;
+}
+
+.size-number-input {
+    width: 80px;
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    color: #f1f5f9;
+    font-size: 1rem;
+    text-align: center;
+}
+
+.size-number-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.size-slider-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.size-slider {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+}
+
+.size-slider::-webkit-slider-thumb {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+    transition: all 0.3s ease;
+}
+
+.size-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.size-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.slider-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: #64748b;
+    margin-top: 0.25rem;
+}
+
 .create-deck-btn {
     width: 100%;
     padding: 1rem 2rem;
@@ -765,8 +869,12 @@ body {
         margin-bottom: 2rem;
     }
     
-    .app-title {
-        font-size: 1.5rem;
+    .main-title {
+        font-size: 2rem;
+    }
+    
+    .subtitle {
+        font-size: 0.9rem;
     }
     
     .add-deck-btn {
@@ -800,5 +908,15 @@ body {
     
     .card-selector {
         font-size: 0.6rem;
+    }
+
+    .deck-size-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+    
+    .size-input-group {
+        align-items: center;
     }
 }
