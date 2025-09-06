@@ -184,7 +184,6 @@ class CardDeckApp {
         
         // Calculate some stats about the deck
         const totalCards = deck.cards.length;
-        const remainingCards = totalCards - deck.currentIndex;
         const suitCounts = this.getSuitCounts(deck.cards);
         
         deckCard.innerHTML = `
@@ -195,12 +194,11 @@ class CardDeckApp {
                     <div class="deck-options-menu" id="options-${deck.id}">
                         <div class="deck-option-item" data-action="rename" data-deck-id="${deck.id}">Rename Deck</div>
                         <div class="deck-option-item" data-action="duplicate" data-deck-id="${deck.id}">Duplicate Deck</div>
-                        <div class="deck-option-item" data-action="reset" data-deck-id="${deck.id}">Clear Progress</div>
                         <div class="deck-option-item danger" data-action="delete" data-deck-id="${deck.id}">Delete Deck</div>
                     </div>
                 </div>
                 <div class="deck-stats">
-                    <span class="card-count">${remainingCards}/${totalCards}</span>
+                    <span class="card-count">${totalCards} cards</span>
                 </div>
             </div>
             <div class="deck-preview">
@@ -271,9 +269,6 @@ class CardDeckApp {
                 break;
             case 'duplicate':
                 this.duplicateDeck(deck);
-                break;
-            case 'reset':
-                this.resetDeckProgress(deck);
                 break;
             case 'delete':
                 this.confirmDeleteDeck(deck);

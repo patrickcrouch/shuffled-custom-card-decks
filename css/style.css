@@ -263,10 +263,6 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.deck-progress {
-    margin-bottom: 0.5rem;
-}
-
 .deck-meta {
     display: flex;
     justify-content: space-between;
@@ -718,10 +714,6 @@ body {
     background: rgba(59, 130, 246, 0.3);
     border-color: #3b82f6;
     color: #f1f5f9;
-}
-
-.suit-row {
-    display: contents;
 }
 
 .suit-label {
