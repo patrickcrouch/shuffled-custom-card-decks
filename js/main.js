@@ -322,6 +322,9 @@ class CardDeckApp {
         
         // Show the playing view
         document.getElementById('deckPlayingView').classList.add('active');
+
+        // Initialize layout with invisible left-hand placeholder
+        this.initializeDeckLayout();
         
         // Setup card click handler
         this.setupCardClickHandler();
@@ -368,6 +371,15 @@ class CardDeckApp {
         }
     }
 
+    initializeDeckLayout() {
+        const flippedCardArea = document.getElementById('flippedCardArea');
+
+        // Add placeholder to maintain consistent layout when flipping cards
+        flippedCardArea.innerHTML = `
+            <div class="card-placeholder" id="cardPlaceholder"></div>
+        `;
+    }
+
     flipNextCard() {
         if (this.currentDeck.currentIndex >= this.currentDeck.cards.length) return;
         
@@ -389,9 +401,15 @@ class CardDeckApp {
         cardElement.className = 'flipped-card';
         cardElement.style.backgroundImage = `url('svg/${card.fileName}')`;
         
-        // Clear previous card and show new one
-        flippedCardArea.innerHTML = '';
-        flippedCardArea.appendChild(cardElement);
+        // If placeholder exists, replace placeholder instead of clearing area
+        const placeholder = document.getElementById('cardPlaceholder');
+        if (placeholder) {
+            placeholder.replaceWith(cardElement);
+        } else {
+            // placeholder not preset, replace existing flipped card
+            flippedCardArea.innerHTML = '';
+            flippedCardArea.appendChild(cardElement);
+        }
         
         // Add a subtle animation
         cardElement.style.opacity = '0';
@@ -416,6 +434,7 @@ class CardDeckApp {
                 <div class="card-back" id="cardBack"></div>
             </div>
         `;
+        this.initializeDeckLayout();
         
         // Update UI and setup handlers
         this.updateDeckPlayingUI();

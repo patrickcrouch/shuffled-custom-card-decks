@@ -383,6 +383,12 @@ body {
     box-shadow: 0 12px 35px rgba(0, 0, 0, 0.5);
 }
 
+.card-placeholder {
+    width: 140px;
+    height: 196px;
+    visibility: hidden;
+}
+
 .flipped-card {
     width: 140px;
     height: 196px;

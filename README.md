@@ -6,7 +6,7 @@ Shuffled Custom Card Decks is a lightweight web application designed to enhance 
 - Better mobile responsiveness for the interface
 - Keyboard shortcuts and accessibility improvements
 - Redo card flip animations to come from deck instead of in place
-- Add blank for unflipped card so that deck and buttons don't awkwardly slide sideways on first flip
-- Make each selection in deck selection have a card back image
-- Preset filters ("face cards only", "hearts only", etc.)
+- Make each selection in deck selection have a card back image?
 - Move modal delete confirmation to pop up smaller and closer to box
+- Is distribution of suits really necessary?
+- No longer need eg. 52/52, this was related to progression through deck.  Might be good to leave total card count.
