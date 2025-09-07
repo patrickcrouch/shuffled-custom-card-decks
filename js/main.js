@@ -310,18 +310,16 @@ class CardDeckApp {
     }
 
     setupCardClickHandler() {
-        const cardBack = document.getElementById('cardBack');
         const remainingDeckArea = document.getElementById('remainingDeckArea');
-        
-        // Remove existing listeners
-        cardBack.replaceWith(cardBack.cloneNode(true));
-        const newCardBack = document.getElementById('cardBack');
         
         if (this.currentDeck.currentIndex < this.currentDeck.cards.length) {
             // Still have cards to flip
-            newCardBack.addEventListener('click', () => {
-                this.flipNextCard();
-            });
+            const cardStack = remainingDeckArea.querySelector('.card-stack');
+            if (cardStack) {
+                cardStack.addEventListener('click', () => {
+                    this.flipNextCardGroup();
+                });
+            }
         } else {
             // Deck is empty, show reset option
             remainingDeckArea.innerHTML = `
@@ -352,51 +350,102 @@ class CardDeckApp {
 
     initializeDeckLayout() {
         const flippedCardArea = document.getElementById('flippedCardArea');
+        const remainingDeckArea = document.getElementById('remainingDeckArea');
 
         // Add placeholder to maintain consistent layout when flipping cards
         flippedCardArea.innerHTML = `
             <div class="card-placeholder" id="cardPlaceholder"></div>
         `;
+
+        this.updateRemainingCardsDisplay();
     }
 
-    flipNextCard() {
-        if (this.currentDeck.currentIndex >= this.currentDeck.cards.length) return;
+    updateRemainingCardsDisplay() {
+        const remainingDeckArea = document.getElementById('remainingDeckArea');
+        const remainingCards = this.currentDeck.cards.length - this.currentDeck.currentIndex;
+
+        if (remainingCards <= 0) {
+            remainingDeckArea.innerHTML = `
+                <div class="empty-deck" id="emptyDeck">
+                    <div class="empty-deck-text">Click to Restart</div>
+                </div>
+                `;
+                return;
+        }
+
+        // Create the appropriate number of card backs based on remaining cards
+        const cardsToShow = Math.min(3, remainingCards);
+        let stackHTML = '<div class="card-stack">';
+
+        for (let i = 0; i < cardsToShow; i++) {
+            stackHTML += '<div class="card-back"></div>';
+        }
+
+        stackHTML += '</div>';
+
+        remainingDeckArea.innerHTML = `
+            <div class="card-display" id="deckDisplay">
+                ${stackHTML}
+            </div>
+        `;
+    }
+
+    flipNextCardGroup() {
+        const remainingCards = this.currentDeck.cards.length - this.currentDeck.currentIndex;
+        if (remainingCards <= 0) return;
         
-        const card = this.currentDeck.cards[this.currentDeck.currentIndex];
-        this.currentDeck.currentIndex++;
+        const cardsToFlip = Math.min(3, remainingCards);
+        const flippedCards = []
+
+        // Get the cards to flip
+        for (let i = 0; i < cardsToFlip; i++) {
+            if (this.currentDeck.currentIndex < this.currentDeck.cards.length) {
+                flippedCards.push(this.currentDeck.cards[this.currentDeck.currentIndex]);
+                this.currentDeck.currentIndex++;
+            }
+        }
         
-        // Create flipped card element
-        this.showFlippedCard(card);
+        // Show flipped cards
+        this.showFlippedCardGroup(flippedCards);
         
         // Update UI
         this.updateDeckPlayingUI();
+        this.updateRemainingCardsDisplay();
         this.setupCardClickHandler();
     }
 
-    showFlippedCard(card) {
+    showFlippedCardGroup(cards) {
         const flippedCardArea = document.getElementById('flippedCardArea');
         
-        const cardElement = document.createElement('div');
-        cardElement.className = 'flipped-card';
-        cardElement.style.backgroundImage = `url('svg/${card.fileName}')`;
-        
-        // If placeholder exists, replace placeholder instead of clearing area
+        // Create stack container
+        const stackContainer = document.createElement('div');
+        stackContainer.className = 'flipped-card-stack';
+
+        // Add each card to the stack
+        cards.forEach((card, index) => {
+            const cardElement = document.createElement('div');
+            cardElement.className = 'flipped-card';
+            cardElement.style.backgroundImage = `url('svg/${card.fileName}')`;
+            stackContainer.appendChild(cardElement);
+        });
+
+        // Replace placeholder or existing flipped cards
         const placeholder = document.getElementById('cardPlaceholder');
         if (placeholder) {
-            placeholder.replaceWith(cardElement);
+            placeholder.replaceWith(stackContainer);
         } else {
             // placeholder not preset, replace existing flipped card
             flippedCardArea.innerHTML = '';
-            flippedCardArea.appendChild(cardElement);
+            flippedCardArea.appendChild(stackContainer);
         }
         
         // Add a subtle animation
-        cardElement.style.opacity = '0';
-        cardElement.style.transform = 'scale(0.8) rotateY(180deg)';
+        stackContainer.style.opacity = '0';
+        stackContainer.style.transform = 'scale(0.8)';
         setTimeout(() => {
-            cardElement.style.transition = 'all 0.4s ease';
-            cardElement.style.opacity = '1';
-            cardElement.style.transform = 'scale(1) rotateY(0deg)';
+            stackContainer.style.transition = 'all 0.3s ease';
+            stackContainer.style.opacity = '1';
+            stackContainer.style.transform = 'scale(1)';
         }, 10);
     }
 
@@ -407,12 +456,6 @@ class CardDeckApp {
         document.getElementById('flippedCardArea').innerHTML = '';
         
         // Reset the deck display
-        const remainingDeckArea = document.getElementById('remainingDeckArea');
-        remainingDeckArea.innerHTML = `
-            <div class="card-display" id="deckDisplay">
-                <div class="card-back" id="cardBack"></div>
-            </div>
-        `;
         this.initializeDeckLayout();
         
         // Update UI and setup handlers
