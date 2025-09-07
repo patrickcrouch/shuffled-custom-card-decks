@@ -184,7 +184,6 @@ class CardDeckApp {
         
         // Calculate some stats about the deck
         const totalCards = deck.cards.length;
-        const suitCounts = this.getSuitCounts(deck.cards);
         
         deckCard.innerHTML = `
             <div class="deck-card-header">
@@ -197,16 +196,9 @@ class CardDeckApp {
                         <div class="deck-option-item danger" data-action="delete" data-deck-id="${deck.id}">Delete Deck</div>
                     </div>
                 </div>
-                <div class="deck-stats">
-                    <span class="card-count">${totalCards} cards</span>
-                </div>
             </div>
-            <div class="deck-preview">
-                <div class="suit-distribution">
-                    ${Object.entries(suitCounts).map(([suit, count]) => 
-                        `<span class="suit-count" style="color: ${(suit === '♥' || suit === '♦') ? '#f87171' : '#e4e4e7'}">${suit} ${count}</span>`
-                    ).join('')}
-                </div>
+            <div class="deck-stats">
+                <span class="card-count">${totalCards} cards</span>
             </div>
             <div class="deck-meta">
                 <span class="created-date">Created ${this.formatDate(deck.createdAt)}</span>
@@ -274,14 +266,6 @@ class CardDeckApp {
                 this.confirmDeleteDeck(deck);
                 break;
         }
-    }
-
-    getSuitCounts(cards) {
-        const counts = { '♠': 0, '♥': 0, '♦': 0, '♣': 0 };
-        cards.forEach(card => {
-            counts[card.suit]++;
-        });
-        return counts;
     }
 
     formatDate(dateString) {

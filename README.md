@@ -8,4 +8,6 @@ Shuffled Custom Card Decks is a lightweight web application designed to enhance 
 - Redo card flip animations to come from deck instead of in place
 - Make each selection in deck selection have a card back image?
 - Move modal delete confirmation to pop up smaller and closer to box
-- Is distribution of suits really necessary?
+- typical memorization for competition is done 3 cards at a time.  Remake the flipped card view(s) to display 3 cards at a time from the current deck
+- in competiton, contestants memorize 1 deck, then rearrange a second deck to match the first.  Come up with an interface for this
+- timers for memorization and for assembling 2nd deck
