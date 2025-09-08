@@ -342,9 +342,9 @@ class CardDeckApp {
         
         const resetHint = document.getElementById('resetHint');
         if (remaining === 0) {
-            resetHint.style.display = 'block';
+            resetHint.classList.add('visible');
         } else {
-            resetHint.style.display = 'none';
+            resetHint.classList.remove('visible');
         }
     }
 
@@ -358,6 +358,10 @@ class CardDeckApp {
         `;
 
         this.updateRemainingCardsDisplay();
+
+        // Hide reset hint on unflipped decks
+        const resetHint = document.getElementById('resetHint');
+        resetHint.classList.remove('visible');
     }
 
     updateRemainingCardsDisplay() {

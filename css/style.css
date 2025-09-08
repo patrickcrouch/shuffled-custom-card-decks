@@ -435,11 +435,12 @@ body {
 
 .deck-info {
     position: absolute;
-    bottom: -60px;
+    bottom: -80px;
     left: 50%;
     transform: translateX(-50%);
     text-align: center;
     color: #94a3b8;
+    min-height: 60px;
 }
 
 .deck-title {
@@ -458,6 +459,16 @@ body {
     font-size: 0.8rem;
     color: #64748b;
     font-style: italic;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+}
+
+.reset-hint.visible {
+    opacity: 1;
 }
 
 /* Empty deck state */
