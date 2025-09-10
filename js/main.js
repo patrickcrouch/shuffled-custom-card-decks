@@ -394,7 +394,30 @@ class CardDeckApp {
         `;
     }
 
-    flipNextCardGroup() {
+    showFlippedCardGroup(cards) {
+    // This method is now only used for non-animated display
+    // The animation is handled by animateCardsSequentially
+    const flippedCardArea = document.getElementById('flippedCardArea');
+    const stackContainer = document.createElement('div');
+    stackContainer.className = 'flipped-card-stack';
+
+    cards.forEach((card, index) => {
+        const cardElement = document.createElement('div');
+        cardElement.className = 'flipped-card';
+        cardElement.style.backgroundImage = `url('svg/${card.fileName}')`;
+        stackContainer.appendChild(cardElement);
+    });
+
+    const placeholder = document.getElementById('cardPlaceholder');
+    if (placeholder) {
+        placeholder.replaceWith(stackContainer);
+    } else {
+        flippedCardArea.innerHTML = '';
+        flippedCardArea.appendChild(stackContainer);
+    }
+}
+
+    async flipNextCardGroup() {
         const remainingCards = this.currentDeck.cards.length - this.currentDeck.currentIndex;
         if (remainingCards <= 0) return;
         
@@ -408,9 +431,9 @@ class CardDeckApp {
                 this.currentDeck.currentIndex++;
             }
         }
-        
-        // Show flipped cards
-        this.showFlippedCardGroup(flippedCards);
+
+        // Animate cards one by one
+        await this.animateCardsSequentially(flippedCards);
         
         // Update UI
         this.updateDeckPlayingUI();
@@ -418,23 +441,64 @@ class CardDeckApp {
         this.setupCardClickHandler();
     }
 
-    showFlippedCardGroup(cards) {
+    async animateSingleCard(card, index, deckRect, flippedRect, container) {
+        return new Promise(resolve => {
+            //create card
+            const cardElement = document.createElement('div');
+            cardElement.className = 'flipped-card animating';
+            cardElement.style.backgroundImage = `url('svg/${card.fileName}')`;
+
+            // Calculate positions
+            const deltaX = deckRect.left - flippedRect.left;
+            const deltaY = deckRect.top - flippedRect.top;
+
+            // Set initial position (at deck location)
+            cardElement.style.position = 'absolute';
+            cardElement.style.transform = `translate(${deltaX}px, ${deltaY}px) rotate(0deg) scale(1)`;
+            cardElement.style.zIndex = 10 + index;
+            cardElement.style.transition = 'none';
+            
+            container.appendChild(cardElement);
+            
+            // Force reflow
+            cardElement.offsetHeight;
+            
+            // Calculate final position based on stack index
+            const finalTransforms = [
+                'translateX(-24px) rotate(-4deg)',
+                'translateX(0px) rotate(0deg)', 
+                'translateX(24px) rotate(4deg)'
+            ];
+            
+            const finalTransform = finalTransforms[index] || 'translateX(0px) rotate(0deg)';
+            
+            // Animate to final position
+            cardElement.style.transition = 'transform 100ms cubic-bezier(0.4, 0.0, 0.2, 1)';
+            cardElement.style.transform = finalTransform;
+            
+            // Clean up after animation
+            setTimeout(() => {
+                cardElement.classList.remove('animating');
+                cardElement.style.position = '';
+                cardElement.style.zIndex = '';
+                cardElement.style.transition = '';
+                resolve();
+            }, 150);
+        });
+    }
+
+    async animateCardsSequentially(cards) {
         const flippedCardArea = document.getElementById('flippedCardArea');
-        
-        // Create stack container
+        const remainingDeckArea = document.getElementById('remainingDeckArea');
+
+        const deckRect = remainingDeckArea.getBoundingClientRect();
+        const flippedRect = flippedCardArea.getBoundingClientRect();
+
+        // Clear existing content and create container
+        const placeholder = document.getElementById('cardPlaceholder');
         const stackContainer = document.createElement('div');
         stackContainer.className = 'flipped-card-stack';
 
-        // Add each card to the stack
-        cards.forEach((card, index) => {
-            const cardElement = document.createElement('div');
-            cardElement.className = 'flipped-card';
-            cardElement.style.backgroundImage = `url('svg/${card.fileName}')`;
-            stackContainer.appendChild(cardElement);
-        });
-
-        // Replace placeholder or existing flipped cards
-        const placeholder = document.getElementById('cardPlaceholder');
         if (placeholder) {
             placeholder.replaceWith(stackContainer);
         } else {
@@ -443,14 +507,14 @@ class CardDeckApp {
             flippedCardArea.appendChild(stackContainer);
         }
         
-        // Add a subtle animation
-        stackContainer.style.opacity = '0';
-        stackContainer.style.transform = 'scale(0.8)';
-        setTimeout(() => {
-            stackContainer.style.transition = 'all 0.3s ease';
-            stackContainer.style.opacity = '1';
-            stackContainer.style.transform = 'scale(1)';
-        }, 10);
+        // Animate each card
+        for (let i = 0; i < cards.length; i++) {
+            await this.animateSingleCard(cards[i], i, deckRect, flippedRect, stackContainer);
+            // small between-card delay (50ms)
+            if (i < cards.length - 1) {
+                await new Promise(resolve => setTimeout(resolve, 50));
+            }
+        }
     }
 
     resetDeck() {

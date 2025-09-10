@@ -379,6 +379,10 @@ body {
     background-repeat: no-repeat;
 }
 
+.flipped-card .animating {
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6);
+}
+
 .card-stack {
     position: relative;
     width: 140px;
